@@ -1,0 +1,30 @@
+# Data and run outputs are regenerated (nyload-data) and never committed
+/data/
+/outputs/
+/multirun/
+*.parquet
+
+# Model artifacts: only the legacy reference weights are tracked
+*.pt
+*.pkl
+!models/legacy/*
+
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+build/
+dist/
+.pytest_cache/
+
+# Jupyter / editors / OS
+.ipynb_checkpoints/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

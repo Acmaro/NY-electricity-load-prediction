@@ -1,0 +1,8 @@
+# Scenario 2 (README): recent data, 2022 validation, 2023 test
+defaults:
+  - capitl_2015_2019
+  - _self_
+
+train_years: [2019, 2020, 2021]
+val_years: [2022]
+test_years: [2023]

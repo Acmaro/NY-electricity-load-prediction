@@ -1,0 +1,7 @@
+# Smoke test: a couple of short epochs, finishes on CPU in about a minute
+defaults:
+  - default
+  - _self_
+
+epochs: 2
+max_batches_per_epoch: 20

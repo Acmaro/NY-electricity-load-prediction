@@ -1,0 +1,5 @@
+# RunPod GPU pod. scripts/runpod_setup.sh points NYLOAD_DATA_DIR / NYLOAD_OUTPUT_DIR at /workspace.
+device: cuda
+precision: auto   # bf16 on A100/H100/4090, fp16 on older cards
+num_workers: 8
+compile: false

@@ -1,0 +1,6 @@
+# Native Windows + CUDA (e.g. RTX 4070 Ti). DataLoader workers use spawn on Windows, keep them few.
+# torch.compile needs Triton, which is not reliable on native Windows -> off.
+device: cuda
+precision: fp32   # TF32 is enabled automatically; try bf16 for larger models
+num_workers: 2
+compile: false

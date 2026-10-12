@@ -1,0 +1,11 @@
+defaults:
+  - train
+  - _self_
+
+run_dir: null      # a training run: reuse its data/model config and best.pt
+checkpoint: null   # or an explicit .pt with the data/model given on the command line
+splits: [test]
+
+hydra:
+  run:
+    dir: ${oc.env:NYLOAD_OUTPUT_DIR,outputs}/evals/${now:%Y-%m-%d_%H-%M-%S}_${model.name}

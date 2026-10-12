@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nyload"
+version = "0.1.0"
+description = "Day-ahead electricity load forecasting for NYISO zones"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "pyarrow>=12",
+    "scikit-learn>=1.3",
+    "holidays>=0.40",
+    "requests>=2.28",
+    "hydra-core>=1.3",
+    "matplotlib>=3.7",
+    # Install the CUDA build of torch first (see README); this only pins the minimum.
+    "torch>=2.2",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7", "ipykernel"]
+
+[project.scripts]
+nyload-data = "nyload.data.cli:main"
+nyload-train = "nyload.train.run:main"
+nyload-eval = "nyload.eval.run:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,9 @@
+epochs: 30
+batch_size: 64
+lr: 1.0e-4
+weight_decay: 0.0
+loss: mse                 # mse | mae | huber
+grad_clip: 1.0
+scheduler: plateau        # plateau | cosine | none
+early_stop_patience: 8    # 0 disables
+max_batches_per_epoch: null

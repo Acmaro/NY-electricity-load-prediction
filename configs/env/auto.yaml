@@ -1,0 +1,4 @@
+device: auto      # cuda > mps > cpu
+precision: fp32   # fp32 | bf16 | fp16 | auto ; small RNNs gain little from mixed precision
+num_workers: 0
+compile: false

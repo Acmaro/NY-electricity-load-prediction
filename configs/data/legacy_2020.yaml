@@ -1,0 +1,13 @@
+# Reproduces the original notebook: train on 2020 (last 20% as validation), test 2021,
+# 7 raw features with only load/temp standardized. Used to evaluate models/legacy/*.pt.
+# Those weights were trained on KLGA station temperatures (weather_com source).
+defaults:
+  - capitl_2015_2019
+  - _self_
+
+train_years: [2020]
+val_years: []
+val_fraction: 0.2
+test_years: [2021]
+features: [load, temp, is_workday, year, month, day, hour]
+scale: [load, temp]

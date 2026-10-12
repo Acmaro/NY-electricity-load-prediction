@@ -1,0 +1,5 @@
+# WSL2 (Ubuntu) + CUDA on the same Windows machine. Keep data on the Linux filesystem (~/...), not /mnt/c.
+device: cuda
+precision: fp32
+num_workers: 8
+compile: false

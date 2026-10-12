@@ -1,0 +1,16 @@
+# Scenario 1 (README): pre-pandemic training, 2020 test
+zone: CAPITL
+train_years: [2015, 2016, 2017, 2018, 2019]
+val_years: []
+val_fraction: 0.1        # used when val_years is empty: last 10% of the training period
+test_years: [2020]
+
+seq_len: 288             # history: 1 day of 5-min steps
+pred_len: 288            # predict the next day
+gap: 0                   # steps between end of history and the predicted day (e.g. 132 = issue at 13:00 the day before)
+train_stride: 1          # >1 subsamples training windows
+val_stride: 12           # validation loss on hourly-spaced windows (same signal, 12x cheaper)
+
+features: [load, temp, dewpt, wspd, is_workday, hour_sin, hour_cos, dow_sin, dow_cos, doy_sin, doy_cos]
+scale: [load, temp, dewpt, wspd]
+holidays: {country: US, subdiv: null}
