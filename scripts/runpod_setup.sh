@@ -4,7 +4,7 @@
 #
 #   cd /workspace && git clone https://github.com/Acmaro/NY-electricity-load-prediction.git
 #   cd NY-electricity-load-prediction && bash scripts/runpod_setup.sh
-#   source ~/.nyload_env && nyload-train env=runpod
+#   source ~/.nyload_env && ./run.sh train
 set -euo pipefail
 
 VOLUME=${VOLUME:-/workspace}
@@ -23,6 +23,6 @@ grep -q nyload_env ~/.bashrc || echo "source ~/.nyload_env" >> ~/.bashrc
 source ~/.nyload_env
 
 # Downloads are cached on the volume, so re-running only builds what is missing.
-nyload-data all --years "$YEARS"
-python -m pytest -q
-echo "ready: nyload-train env=runpod"
+python -m nyload data --years "$YEARS"
+python -m nyload test
+echo "ready: ./run.sh train"

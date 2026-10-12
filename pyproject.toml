@@ -25,6 +25,7 @@ dependencies = [
 dev = ["pytest>=7", "ipykernel"]
 
 [project.scripts]
+nyload = "nyload.cli:main"
 nyload-data = "nyload.data.cli:main"
 nyload-train = "nyload.train.run:main"
 nyload-eval = "nyload.eval.run:main"

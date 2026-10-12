@@ -14,39 +14,55 @@ Day-ahead backtest: for every test day the model only sees history up to midnigh
 | GRU (original notebook weights, `models/legacy/GRU.pt`) | 90.4 | 6.46 % | 0.750 |
 | **NYISO day-ahead forecast** | **60.1** | **4.35 %** | **0.894** |
 
-Reproduce with `nyload-eval data=legacy_2020 model=lstm checkpoint=models/legacy/LSTM.pt`
+Reproduce with `./run.sh eval data=legacy_2020 model=lstm checkpoint=models/legacy/LSTM.pt`
 (on weather built with `--weather-source weather_com --station KLGA`, which is what those weights were trained on).
 Numbers reported by the earlier notebooks were computed on partial periods and are not comparable.
 
-## Setup
+## Quick start
 
-Python ≥ 3.10. Install the CUDA build of PyTorch first, then the package.
+Everything goes through one entry point: `run.ps1` on Windows, `run.sh` elsewhere
+(both call `python -m nyload` inside `.venv`).
 
-**Windows (native, e.g. RTX 4070 Ti)**
+**Windows (e.g. RTX 4070 Ti)**
 ```powershell
-py -3.11 -m venv .venv
-.venv\Scripts\activate
-pip install torch --index-url https://download.pytorch.org/whl/cu124
-pip install -e ".[dev]"
+powershell -ExecutionPolicy Bypass -File scripts\setup.ps1 -Data   # once: .venv, CUDA torch, package, data
+.\run.ps1 doctor                                                   # check GPU / data
+.\run.ps1 train                                                    # train with the default config
+.\run.ps1 runs                                                     # compare finished runs
 ```
 
-**WSL2 / Linux** – same with `python -m venv .venv && source .venv/bin/activate`.
-Keep the repo and data on the Linux filesystem (`~/...`), not under `/mnt/c`, or I/O becomes the bottleneck.
+**Linux / WSL2 / macOS**
+```bash
+bash scripts/setup.sh --data
+./run.sh train
+```
+On WSL2 keep the repo and data on the Linux filesystem (`~/...`), not under `/mnt/c`.
 
-**macOS / CPU** – `pip install -e ".[dev]"` is enough.
-
-**RunPod** – start a pod from a PyTorch template with a network volume mounted at `/workspace`:
+**RunPod** – PyTorch template with a network volume at `/workspace`:
 ```bash
 cd /workspace && git clone https://github.com/Acmaro/NY-electricity-load-prediction.git
 cd NY-electricity-load-prediction && bash scripts/runpod_setup.sh
-source ~/.nyload_env && nyload-train env=runpod
+./run.sh train
 ```
+
+| Command | What it does |
+|---|---|
+| `doctor` | Python / torch / GPU / available data |
+| `data --years 2013-2023` | download and build data (`data -h` for options) |
+| `train [overrides]` | train + backtest, see [Training](#training) |
+| `eval [overrides]` | backtest a run or checkpoint, see [Evaluation](#evaluation) |
+| `runs` | table of finished runs with test metrics vs NYISO |
+| `test` | pytest suite |
+
+`train` / `eval` choose the env config for the machine (`local_win`, `local_wsl`, `runpod`, else `auto`)
+unless `env=...` is passed. Manual install: `pip install torch --index-url https://download.pytorch.org/whl/cu124`
+then `pip install -e ".[dev]"`; the `nyload` command is then available directly.
 
 ## Data
 
 Data is not stored in git; it is downloaded and rebuilt:
 ```bash
-nyload-data all --years 2013-2023
+./run.sh data --years 2013-2023
 ```
 
 | Source | Content | Raw location |
@@ -77,19 +93,20 @@ Configuration is composed with [Hydra](https://hydra.cc) from `configs/`:
 | `env` | `auto`, `cpu`, `local_win`, `local_wsl`, `runpod` |
 
 ```bash
-nyload-train                                     # defaults: capitl_2015_2019 + gru + auto device
-nyload-train env=local_win model=lstm train.epochs=50 model.hidden_size=128
-nyload-train data=recent_2019_2021 data.gap=132  # history ends 13:00 the day before, like NYISO's issue time
-nyload-train train=fast_debug env=cpu            # smoke test
-nyload-train -m model=gru,lstm model.hidden_size=32,64,128   # grid sweep
+./run.sh train                                       # defaults: capitl_2015_2019 + gru
+./run.sh train model=lstm train.epochs=50 model.hidden_size=128
+./run.sh train data=recent_2019_2021 data.gap=132    # history ends 13:00 the day before, like NYISO's issue time
+./run.sh train train=fast_debug                      # smoke test
+./run.sh train -m model=gru,lstm model.hidden_size=32,64,128   # grid sweep
 ```
+(Windows: `.\run.ps1` instead of `./run.sh`.)
 
 Each run writes to `outputs/runs/<time>_<model>/`: the resolved config (`.hydra/`), `best.pt`, `last.pt`,
 `history.json`, `preprocessor.json`, `metrics.json` and day-ahead predictions for the validation and test splits.
 
 Re-evaluate a run:
 ```bash
-nyload-eval run_dir=outputs/runs/<run> splits=[val,test]
+./run.sh eval run_dir=outputs/runs/<run> splits=[val,test]
 ```
 
 ## Evaluation
@@ -110,7 +127,7 @@ Weather inputs are observed values (a perfect-weather-forecast assumption).
        def __init__(self, num_features, output_size, channels=64, levels=4): ...
    ```
 2. Import it in `src/nyload/models/__init__.py`.
-3. Add `configs/model/tcn.yaml` with `name: tcn` and its hyperparameters, then `nyload-train model=tcn`.
+3. Add `configs/model/tcn.yaml` with `name: tcn` and its hyperparameters, then `./run.sh train model=tcn`.
 
 ## Layout
 
@@ -122,14 +139,15 @@ src/nyload/
   models/           model registry, LSTM / GRU
   train/            trainer and `nyload-train`
   eval/             metrics, day-ahead backtest and `nyload-eval`
-scripts/            RunPod setup
+scripts/            setup (Windows / Linux / RunPod)
+run.ps1, run.sh     entry point -> python -m nyload
 tests/              pytest suite (DST handling, split/leakage checks, models)
 models/legacy/      weights from the original notebooks
 notebooks/legacy/   original notebooks, kept for reference
 ```
 
 ```bash
-pytest -q
+./run.sh test
 ```
 
 ## Limitations
